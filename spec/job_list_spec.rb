@@ -13,5 +13,19 @@ RSpec.describe JobList, type: :model do
       expect(described_class.calculate_sequence_from_input('a => ')).to eq ['a']
     end
 
+    context 'Given a multiline job structure with no dependent jobs' do
+      let(:job_string) do
+        <<-EOS
+          a =>
+          b =>
+          c =>
+        EOS
+      end
+
+      it 'returns the jobs in no particular order' do
+        expect(described_class.calculate_sequence_from_input(job_string)).to eq ['a', 'b', 'c']
+      end
+    end
+
   end
 end
