@@ -4,7 +4,7 @@ class JobList
     if input.empty?
       []
     else
-      ['a']
+      input.gsub(/\s+/, '').split('=>')
     end
   end
 
