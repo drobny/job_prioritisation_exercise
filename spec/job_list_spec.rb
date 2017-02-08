@@ -27,5 +27,19 @@ RSpec.describe JobList, type: :model do
       end
     end
 
+    context 'Given a multiline job structure with dependent jobs' do
+      let(:job_string) do
+        <<-EOS
+          a =>
+          b => c
+          c =>
+        EOS
+      end
+
+      it 'returns the jobs with the independent job before the dependent job' do
+        expect(described_class.calculate_sequence_from_input(job_string)).to eq ['c', 'b', 'a']
+      end
+    end
+
   end
 end
