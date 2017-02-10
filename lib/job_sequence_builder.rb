@@ -1,3 +1,5 @@
+require_relative 'job_sequence_error'
+
 class JobSequenceBuilder
   attr_accessor :job_sequence
 

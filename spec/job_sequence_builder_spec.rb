@@ -1,6 +1,5 @@
 require 'spec_helper'
 require 'job_sequence_builder'
-require 'job_sequence_error'
 
 RSpec.describe JobSequenceBuilder, type: :model do
 

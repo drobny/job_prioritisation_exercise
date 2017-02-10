@@ -1,3 +1,5 @@
+require_relative 'job_sequence_builder'
+
 class JobList
   attr_reader :job_string
 
