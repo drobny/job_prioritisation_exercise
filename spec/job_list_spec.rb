@@ -37,7 +37,7 @@ RSpec.describe JobList, type: :model do
       end
     end
 
-    context 'Given a multiline job structure with dependent jobs' do
+    context 'Given a multiline job structure with one dependent job' do
       let(:job_string) do
         <<-EOS
           a =>
@@ -48,6 +48,23 @@ RSpec.describe JobList, type: :model do
 
       it 'returns the jobs with the independent job before the dependent job' do
         expect(calculated_sequence).to eq ['c', 'b', 'a']
+      end
+    end
+
+    context 'Given a multiline job structure with multiple dependent jobs' do
+      let(:job_string) do
+        <<-EOS
+          a =>
+          b => c
+          c => f
+          d => a
+          e => b
+          f =>
+        EOS
+      end
+
+      it 'returns the jobs with the independent job before the dependent job' do
+        expect(calculated_sequence).to eq ['f', 'c', 'b', 'e', 'a', 'd']
       end
     end
 
