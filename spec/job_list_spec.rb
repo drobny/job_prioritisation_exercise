@@ -3,14 +3,24 @@ require 'job_list'
 
 RSpec.describe JobList, type: :model do
 
-  describe '.calculate_sequence_from_input' do
+  describe '#calculate_sequence' do
+    subject { described_class.new(job_string) }
+    let(:calculated_sequence) { subject.calculate_sequence }
 
-    it 'returns an empty collection if the input passed in is empty' do
-      expect(described_class.calculate_sequence_from_input('')).to eq []
+    context 'when the input is empty' do
+      let(:job_string) { '' }
+
+      it 'returns an empty collection' do
+        expect(calculated_sequence).to eq []
+      end
     end
 
-    specify 'Given a basic job structure i.e. "a => " return a single job' do
-      expect(described_class.calculate_sequence_from_input('a => ')).to eq ['a']
+    context 'Given a basic job structure with one line' do
+      let(:job_string) { 'a => ' }
+
+      it 'returns a single job' do
+        expect(calculated_sequence).to eq ['a']
+      end
     end
 
     context 'Given a multiline job structure with no dependent jobs' do
@@ -23,7 +33,7 @@ RSpec.describe JobList, type: :model do
       end
 
       it 'returns the jobs in no particular order' do
-        expect(described_class.calculate_sequence_from_input(job_string)).to eq ['a', 'b', 'c']
+        expect(calculated_sequence).to eq ['a', 'b', 'c']
       end
     end
 
@@ -37,7 +47,7 @@ RSpec.describe JobList, type: :model do
       end
 
       it 'returns the jobs with the independent job before the dependent job' do
-        expect(described_class.calculate_sequence_from_input(job_string)).to eq ['c', 'b', 'a']
+        expect(calculated_sequence).to eq ['c', 'b', 'a']
       end
     end
 

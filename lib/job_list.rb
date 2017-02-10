@@ -1,19 +1,23 @@
 class JobList
+  attr_reader   :job_string
+  attr_accessor :job_sequence
 
-  def self.calculate_sequence_from_input(input)
-    if input.empty?
-      []
-    else
-      input.each_line.inject([]) do |collection, line|
-        job, dependent_job = line.gsub(/\s+/, '').split('=>')
-        if dependent_job
-          [dependent_job, job] + collection
-        else
-          collection << job unless collection.include?(job)
-          collection
-        end
+  def initialize(job_string)
+    @job_string = job_string
+    @job_sequence = []
+  end
+
+  def calculate_sequence
+    return [] if self.job_string.empty?
+    self.job_string.each_line do |line|
+      job, dependent_job = line.gsub(/\s+/, '').split('=>')
+      if dependent_job
+        self.job_sequence = [dependent_job, job] + self.job_sequence
+      elsif !self.job_sequence.include?(job)
+        self.job_sequence << job
       end
     end
+    self.job_sequence
   end
 
 end
