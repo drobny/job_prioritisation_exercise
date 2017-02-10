@@ -15,10 +15,10 @@ RSpec.describe JobList, type: :model do
     end
 
     context 'when the input is not empty' do
-      let(:job_string)           { 'some_string' }
+      let(:job_hash)             { { 'a' => nil } }
       let(:job_sequence_builder) { instance_double('JobSequenceBuilder', job_sequence: ['a']) }
 
-      before { allow(JobSequenceBuilder).to receive(:new).and_return(job_sequence_builder) }
+      before { allow(JobSequenceBuilder).to receive(:new).with(job_hash).and_return(job_sequence_builder) }
 
       specify 'the sequence builder is run' do
         expect(job_sequence_builder).to receive(:build_sequence)

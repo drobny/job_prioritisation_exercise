@@ -9,9 +9,15 @@ class JobList
 
   def output_sequence
     return [] if self.job_string.empty?
-    calculator = JobSequenceBuilder.new
-    calculator.build_sequence(self.job_string)
+    calculator = JobSequenceBuilder.new(job_hash)
+    calculator.build_sequence
     calculator.job_sequence
   end
+
+  private
+    def job_hash(klass = JobStringConverter)
+      klass.new(job_string).convert_to_hash
+    end
+
 
 end
