@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'job_sequence_builder'
 require 'job_list'
 
 RSpec.describe JobList, type: :model do
