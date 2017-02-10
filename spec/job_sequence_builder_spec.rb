@@ -3,7 +3,7 @@ require 'job_sequence_builder'
 
 RSpec.describe JobSequenceBuilder, type: :model do
 
-  describe '#build_sequence' do    
+  describe '#build_sequence' do
     before  { subject.build_sequence(job_string) }
 
     context 'Given a basic job structure with one line' do
@@ -56,6 +56,20 @@ RSpec.describe JobSequenceBuilder, type: :model do
 
       it 'returns the jobs with the independent job before the dependent job' do
         expect(subject.job_sequence).to eq ['f', 'c', 'b', 'e', 'a', 'd']
+      end
+    end
+
+    context 'when there are jobs that are dependent on themselves' do
+      let(:job_string) do
+        <<-EOS
+          a =>
+          b =>
+          c => c
+        EOS
+      end
+
+      it 'returns an error stating jobs cannot depend on themselves' do
+        expect{ subject.job_sequence }.to raise_error
       end
     end
 

@@ -18,7 +18,7 @@ class JobSequenceBuilder
 
   private
     def add_to_sequence(job, dependent_job)
-      job_index   = self.job_sequence.index(job)
+      job_index           = self.job_sequence.index(job)
       dependent_job_index = self.job_sequence.index(dependent_job)
 
       if job_index && job_not_in_current_sequence?(dependent_job)
