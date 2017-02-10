@@ -4,7 +4,15 @@ class JobList
     if input.empty?
       []
     else
-      input.gsub(/\s+/, '').split('=>')
+      input.each_line.inject([]) do |collection, line|
+        job, dependent_job = line.gsub(/\s+/, '').split('=>')
+        if dependent_job
+          [dependent_job, job] + collection
+        else
+          collection << job unless collection.include?(job)
+          collection
+        end
+      end
     end
   end
 
