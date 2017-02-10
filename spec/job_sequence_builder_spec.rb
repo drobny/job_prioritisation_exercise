@@ -4,24 +4,26 @@ require 'job_sequence_builder'
 RSpec.describe JobSequenceBuilder, type: :model do
 
   describe '#build_sequence' do
-    context 'when the job string is valid' do
-      before  { subject.build_sequence(job_string) }
+    context 'when the job hash is valid' do
+      subject { described_class.new(job_hash) }
+
+      before { subject.build_sequence }
 
       context 'Given a basic job structure with one line' do
-        let(:job_string) { 'a => ' }
+        let(:job_hash) { { 'a' => nil } }
 
         it 'returns a single job' do
           expect(subject.job_sequence).to eq ['a']
         end
       end
 
-      context 'Given a multiline job structure with no dependent jobs' do
-        let(:job_string) do
-          <<-EOS
-            a =>
-            b =>
-            c =>
-          EOS
+      context 'Given job structure with no dependent jobs' do
+        let(:job_hash) do
+          {
+            'a' => nil,
+            'b' => nil,
+            'c' => nil,
+          }
         end
 
         it 'returns the jobs in no particular order' do
@@ -29,47 +31,47 @@ RSpec.describe JobSequenceBuilder, type: :model do
         end
       end
 
-      context 'Given a multiline job structure with one dependent job' do
-        let(:job_string) do
-          <<-EOS
-            a =>
-            b => c
-            c =>
-          EOS
+      context 'Given a job structure with one dependent job' do
+        let(:job_hash) do
+          {
+            'a' => nil,
+            'b' => 'c',
+            'c' => nil
+          }
         end
 
         it 'returns the jobs with the independent job before the dependent job' do
-          expect(subject.job_sequence).to eq ['c', 'b', 'a']
+          expect(subject.job_sequence).to eq ['a', 'c', 'b']
         end
       end
 
-      context 'Given a multiline job structure with multiple dependent jobs' do
-        let(:job_string) do
-          <<-EOS
-            a =>
-            b => c
-            c => f
-            d => a
-            e => b
-            f =>
-          EOS
+      context 'Given a job structure with multiple dependent jobs' do
+        let(:job_hash) do
+          {
+            'a' => nil,
+            'b' => 'c',
+            'c' => 'f',
+            'd' => 'a',
+            'e' => 'b',
+            'f' => nil
+          }
         end
 
         it 'returns the jobs with the independent job before the dependent job' do
-          expect(subject.job_sequence).to eq ['f', 'c', 'b', 'e', 'a', 'd']
+          expect(subject.job_sequence).to eq ['a', 'd', 'f', 'c', 'b', 'e']
         end
       end
 
       context 'Given another multiline job structure with dependent jobs' do
-        let(:job_string) do
-          <<-EOS
-            a => e
-            b => d
-            c =>
-            d => a
-            e => f
-            f =>
-          EOS
+        let(:job_hash) do
+          {
+            'a' => 'e',
+            'b' => 'd',
+            'c' => nil,
+            'd' => 'a',
+            'e' => 'f',
+            'f' => nil
+          }
         end
 
         it 'returns the jobs with the independent job before the dependent job' do
@@ -79,34 +81,20 @@ RSpec.describe JobSequenceBuilder, type: :model do
       end
     end
 
-    context 'when there are jobs that are dependent on themselves' do
-      let(:job_string) do
-        <<-EOS
-          a =>
-          b =>
-          c => c
-        EOS
-      end
-
-      it 'returns an error stating jobs cannot depend on themselves' do
-        expect{ subject.build_sequence(job_string) }.to raise_error(JobSequenceError, 'Jobs cannot depend on themselves')
-      end
-    end
-
     context 'when there are jobs that are have circular dependencies' do
-      let(:job_string) do
-        <<-EOS
-          a =>
-          b => c
-          c => f
-          d => a
-          e =>
-          f => b
-        EOS
+      let(:job_hash) do
+        {
+          'a' => nil,
+          'b' => 'c',
+          'c' => 'f',
+          'd' => 'a',
+          'e' => nil,
+          'f' => 'b'
+        }
       end
 
       it 'returns an error stating jobs cannot have circular dependencies' do
-        expect{ subject.build_sequence(job_string) }.to raise_error(JobSequenceError, 'Jobs cannot have circular dependencies')
+        expect{ described_class.new(job_hash).build_sequence }.to raise_error(JobSequenceError, 'Jobs cannot have circular dependencies')
       end
     end
 
