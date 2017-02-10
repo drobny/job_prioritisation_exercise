@@ -1,70 +1,34 @@
 require 'spec_helper'
+require 'job_sequence_builder'
 require 'job_list'
 
 RSpec.describe JobList, type: :model do
 
-  describe '#calculate_sequence' do
+  describe '#output_sequence' do
     subject { described_class.new(job_string) }
-    let(:calculated_sequence) { subject.calculate_sequence }
 
     context 'when the input is empty' do
       let(:job_string) { '' }
 
       it 'returns an empty collection' do
-        expect(calculated_sequence).to eq []
+        expect(subject.output_sequence).to eq []
       end
     end
 
-    context 'Given a basic job structure with one line' do
-      let(:job_string) { 'a => ' }
+    context 'when the input is not empty' do
+      let(:job_string)           { 'some_string' }
+      let(:job_sequence_builder) { instance_double('JobSequenceBuilder', job_sequence: ['a']) }
 
-      it 'returns a single job' do
-        expect(calculated_sequence).to eq ['a']
-      end
-    end
+      before { allow(JobSequenceBuilder).to receive(:new).and_return(job_sequence_builder) }
 
-    context 'Given a multiline job structure with no dependent jobs' do
-      let(:job_string) do
-        <<-EOS
-          a =>
-          b =>
-          c =>
-        EOS
+      specify 'the sequence builder is run' do
+        expect(job_sequence_builder).to receive(:build_sequence)
+        subject.output_sequence
       end
 
-      it 'returns the jobs in no particular order' do
-        expect(calculated_sequence).to eq ['a', 'b', 'c']
-      end
-    end
-
-    context 'Given a multiline job structure with one dependent job' do
-      let(:job_string) do
-        <<-EOS
-          a =>
-          b => c
-          c =>
-        EOS
-      end
-
-      it 'returns the jobs with the independent job before the dependent job' do
-        expect(calculated_sequence).to eq ['c', 'b', 'a']
-      end
-    end
-
-    context 'Given a multiline job structure with multiple dependent jobs' do
-      let(:job_string) do
-        <<-EOS
-          a =>
-          b => c
-          c => f
-          d => a
-          e => b
-          f =>
-        EOS
-      end
-
-      it 'returns the jobs with the independent job before the dependent job' do
-        expect(calculated_sequence).to eq ['f', 'c', 'b', 'e', 'a', 'd']
+      specify 'the job sequence attribute of the builder is returned' do
+        allow(job_sequence_builder).to receive(:build_sequence)
+        expect(subject.output_sequence).to eq job_sequence_builder.job_sequence
       end
     end
 
