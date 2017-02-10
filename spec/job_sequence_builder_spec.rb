@@ -76,5 +76,22 @@ RSpec.describe JobSequenceBuilder, type: :model do
       end
     end
 
+    context 'when there are jobs that are have circular dependencies' do
+      let(:job_string) do
+        <<-EOS
+          a =>
+          b => c
+          c => f
+          d => a
+          e =>
+          f => b
+        EOS
+      end
+
+      it 'returns an error stating jobs cannot have circular dependencies' do
+        expect{ subject.build_sequence(job_string) }.to raise_error(JobSequenceError, 'Jobs cannot have circular dependencies')
+      end
+    end
+
   end
 end
