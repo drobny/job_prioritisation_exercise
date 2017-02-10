@@ -1,61 +1,64 @@
 require 'spec_helper'
 require 'job_sequence_builder'
+require 'job_sequence_error'
 
 RSpec.describe JobSequenceBuilder, type: :model do
 
   describe '#build_sequence' do
-    before  { subject.build_sequence(job_string) }
+    context 'when the job string is valid' do
+      before  { subject.build_sequence(job_string) }
 
-    context 'Given a basic job structure with one line' do
-      let(:job_string) { 'a => ' }
+      context 'Given a basic job structure with one line' do
+        let(:job_string) { 'a => ' }
 
-      it 'returns a single job' do
-        expect(subject.job_sequence).to eq ['a']
-      end
-    end
-
-    context 'Given a multiline job structure with no dependent jobs' do
-      let(:job_string) do
-        <<-EOS
-          a =>
-          b =>
-          c =>
-        EOS
+        it 'returns a single job' do
+          expect(subject.job_sequence).to eq ['a']
+        end
       end
 
-      it 'returns the jobs in no particular order' do
-        expect(subject.job_sequence).to eq ['a', 'b', 'c']
-      end
-    end
+      context 'Given a multiline job structure with no dependent jobs' do
+        let(:job_string) do
+          <<-EOS
+            a =>
+            b =>
+            c =>
+          EOS
+        end
 
-    context 'Given a multiline job structure with one dependent job' do
-      let(:job_string) do
-        <<-EOS
-          a =>
-          b => c
-          c =>
-        EOS
-      end
-
-      it 'returns the jobs with the independent job before the dependent job' do
-        expect(subject.job_sequence).to eq ['c', 'b', 'a']
-      end
-    end
-
-    context 'Given a multiline job structure with multiple dependent jobs' do
-      let(:job_string) do
-        <<-EOS
-          a =>
-          b => c
-          c => f
-          d => a
-          e => b
-          f =>
-        EOS
+        it 'returns the jobs in no particular order' do
+          expect(subject.job_sequence).to eq ['a', 'b', 'c']
+        end
       end
 
-      it 'returns the jobs with the independent job before the dependent job' do
-        expect(subject.job_sequence).to eq ['f', 'c', 'b', 'e', 'a', 'd']
+      context 'Given a multiline job structure with one dependent job' do
+        let(:job_string) do
+          <<-EOS
+            a =>
+            b => c
+            c =>
+          EOS
+        end
+
+        it 'returns the jobs with the independent job before the dependent job' do
+          expect(subject.job_sequence).to eq ['c', 'b', 'a']
+        end
+      end
+
+      context 'Given a multiline job structure with multiple dependent jobs' do
+        let(:job_string) do
+          <<-EOS
+            a =>
+            b => c
+            c => f
+            d => a
+            e => b
+            f =>
+          EOS
+        end
+
+        it 'returns the jobs with the independent job before the dependent job' do
+          expect(subject.job_sequence).to eq ['f', 'c', 'b', 'e', 'a', 'd']
+        end
       end
     end
 
@@ -69,7 +72,7 @@ RSpec.describe JobSequenceBuilder, type: :model do
       end
 
       it 'returns an error stating jobs cannot depend on themselves' do
-        expect{ subject.job_sequence }.to raise_error
+        expect{ subject.build_sequence(job_string) }.to raise_error(JobSequenceError, 'Jobs cannot depend on themselves')
       end
     end
 

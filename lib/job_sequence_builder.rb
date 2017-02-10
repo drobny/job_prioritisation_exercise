@@ -8,6 +8,7 @@ class JobSequenceBuilder
   def build_sequence(job_string)
     job_string.each_line do |line|
       job, dependent_job = line.gsub(/\s+/, '').split('=>')
+      raise JobSequenceError.new("Jobs cannot depend on themselves") if job == dependent_job
       if dependent_job.nil?
         self.job_sequence << job if job_not_in_current_sequence?(job)
       else
