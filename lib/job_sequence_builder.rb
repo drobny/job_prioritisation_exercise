@@ -22,6 +22,10 @@ class JobSequenceBuilder
       job_index           = self.job_sequence.index(job)
       dependent_job_index = self.job_sequence.index(dependent_job)
 
+      if job_index && dependent_job_index && job_index < dependent_job_index
+        raise JobSequenceError.new("Jobs cannot have circular dependencies")
+      end
+
       if job_index && job_not_in_current_sequence?(dependent_job)
         self.job_sequence.insert(job_index, dependent_job)
       elsif dependent_job_index && job_not_in_current_sequence?(job)
