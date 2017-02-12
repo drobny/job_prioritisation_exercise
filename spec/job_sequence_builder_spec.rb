@@ -58,7 +58,9 @@ RSpec.describe JobSequenceBuilder, type: :model do
         end
 
         it 'returns the jobs with the independent job before the dependent job' do
-          expect(subject.job_sequence).to eq ['a', 'd', 'f', 'c', 'b', 'e']
+          job_sequence_string = subject.job_sequence.join
+          expect(job_sequence_string).to include 'fcbe'
+          expect(job_sequence_string).to include 'ad'
         end
       end
 
@@ -78,6 +80,23 @@ RSpec.describe JobSequenceBuilder, type: :model do
           expect(subject.job_sequence).to eq ['f', 'e', 'a', 'd', 'b', 'c']
         end
 
+      end
+
+      context 'Given another multiline job structure not in sorted order' do
+        let(:job_hash) do
+          {
+            'e' => 'f',
+            'a' => 'e',
+            'f' => nil,
+            'b' => 'd',
+            'd' => 'a',
+            'c' => nil
+          }
+        end
+
+        it 'returns the jobs with the independent job before the dependent job' do
+          expect(subject.job_sequence).to eq ['f', 'e', 'a', 'd', 'b', 'c']
+        end
       end
     end
 
